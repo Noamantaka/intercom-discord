@@ -1,23 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/intercom.js",
-      "use": "@vercel/node"
+  "functions": {
+    "api/intercom.js": {
+      "memory": 128,
+      "maxDuration": 10
     },
-    {
-      "src": "api/discord.js",
-      "use": "@vercel/node"
+    "api/discord.js": {
+      "memory": 128,
+      "maxDuration": 10
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/intercom",
-      "dest": "api/intercom.js"
-    },
-    {
-      "src": "/api/discord",
-      "dest": "api/discord.js"
-    }
-  ]
+  }
 }
