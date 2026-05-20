@@ -1,0 +1,8 @@
+{
+  "name": "intercom-discord",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "build": "echo 'no build step'"
+  }
+}
