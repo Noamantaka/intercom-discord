@@ -14,29 +14,7 @@ async function handler(req, res) {
     return res.status(405).send("Method Not Allowed");
   }
 
-  const signature = req.headers["x-signature-ed25519"];
-  const timestamp = req.headers["x-signature-timestamp"];
   const rawBody = await getRawBody(req);
-
-  console.log("Signature:", signature);
-  console.log("Timestamp:", timestamp);
-  console.log("Public Key:", process.env.DISCORD_PUBLIC_KEY);
-  console.log("Body:", rawBody.toString());
-
-  const isValid = verifyKey(
-    rawBody,
-    signature,
-    timestamp,
-    process.env.DISCORD_PUBLIC_KEY
-  );
-
-  if (!isValid) {
-    console.log("❌ Invalid signature");
-    return res.status(401).send("Invalid signature");
-  }
-
-  console.log("✅ Valid signature");
-
   const { type, data } = JSON.parse(rawBody.toString());
 
   if (type === 1) {
