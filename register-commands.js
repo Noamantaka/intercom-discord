@@ -4,7 +4,7 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const commands = [
   {
     name: "reply",
-    description: "رد على محادثة Intercom",
+    description: "Reply to an Intercom conversation",
     options: [
       {
         name: "conversation_id",
