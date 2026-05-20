@@ -1,6 +1,6 @@
 const { verifyKey } = require("discord-interactions");
 
-module.exports.config = {
+exports.config = {
   api: {
     bodyParser: false,
   },
