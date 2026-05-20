@@ -1,5 +1,5 @@
 const APPLICATION_ID = "1506721049356534060";
-const DISCORD_BOT_TOKEN = "MTUwNjcyMTA0OTM1NjUzNDA2MA.GmPQ0s.dTWD6H8gwjhsCretktCKOZ36qgceKtVbDLl9vk";
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 const commands = [
   {
