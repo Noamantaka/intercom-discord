@@ -1,1 +1,23 @@
-No entrypoint found. Searched for: - app.{js,cjs,mjs,ts,cts,mts} - index.{js,cjs,mjs,ts,cts,mts} - server.{js,cjs,mjs,ts,cts,mts} - src/app.{js,cjs,mjs,ts,cts,mts} - src/index.{js,cjs,mjs,ts,cts,mts} - src/server.{js,cjs,mjs,ts,cts,mts}
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/intercom.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/discord.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/intercom",
+      "dest": "api/intercom.js"
+    },
+    {
+      "src": "/api/discord",
+      "dest": "api/discord.js"
+    }
+  ]
+}
