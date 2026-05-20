@@ -1,13 +1,3 @@
 {
-  "version": 2,
-  "functions": {
-    "api/intercom.js": {
-      "memory": 128,
-      "maxDuration": 10
-    },
-    "api/discord.js": {
-      "memory": 128,
-      "maxDuration": 10
-    }
-  }
+  "version": 2
 }
