@@ -1,3 +1,12 @@
 {
-  "version": 2
+  "version": 2,
+  "functions": {
+    "api/discord.js": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/api/discord", "destination": "/api/discord" }
+  ]
 }
