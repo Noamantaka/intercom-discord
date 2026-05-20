@@ -1,12 +1,1 @@
-{
-  "version": 2,
-  "functions": {
-    "api/discord.js": {
-      "memory": 128,
-      "maxDuration": 10
-    }
-  },
-  "rewrites": [
-    { "source": "/api/discord", "destination": "/api/discord" }
-  ]
-}
+No entrypoint found. Searched for: - app.{js,cjs,mjs,ts,cts,mts} - index.{js,cjs,mjs,ts,cts,mts} - server.{js,cjs,mjs,ts,cts,mts} - src/app.{js,cjs,mjs,ts,cts,mts} - src/index.{js,cjs,mjs,ts,cts,mts} - src/server.{js,cjs,mjs,ts,cts,mts}
