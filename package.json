@@ -6,6 +6,7 @@
     "build": "echo 'no build step'"
   },
   "dependencies": {
-    "discord-interactions": "^4.4.0"
+    "discord-interactions": "^4.4.0",
+    "tweetnacl": "^1.0.3"
   }
 }
