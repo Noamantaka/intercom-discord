@@ -4,12 +4,20 @@
     {
       "src": "api/intercom.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/discord.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/intercom",
       "dest": "api/intercom.js"
+    },
+    {
+      "src": "/api/discord",
+      "dest": "api/discord.js"
     }
   ]
 }
