@@ -4,5 +4,8 @@
   "type": "commonjs",
   "scripts": {
     "build": "echo 'no build step'"
+  },
+  "dependencies": {
+    "discord-interactions": "^4.4.0"
   }
 }
