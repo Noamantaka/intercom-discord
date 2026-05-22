@@ -12,7 +12,8 @@ module.exports = async function handler(req, res) {
   const isMessageEvent =
     eventType === "conversation.user.replied" ||
     eventType === "conversation.user.created" ||
-    eventType === "conversation.admin.replied";
+    eventType === "conversation.admin.replied" ||
+    eventType === "conversation.admin.single.created";
 
   if (!isMessageEvent) {
     console.log("Ignored event type:", eventType);
@@ -33,17 +34,19 @@ module.exports = async function handler(req, res) {
     "No Email";
 
   let rawMessage;
-  if (eventType === "conversation.user.created") {
+    if (eventType === "conversation.user.created") {
     rawMessage = item?.source?.body || "No message content";
-  } else if (
+    } else if (eventType === "conversation.admin.single.created") {
+    rawMessage = item?.source?.body || "No message content";
+    } else if (
     eventType === "conversation.user.replied" ||
     eventType === "conversation.admin.replied"
-  ) {
+    ) {
     rawMessage =
-      item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
-      item?.source?.body ||
-      "No message content";
-  }
+        item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
+        item?.source?.body ||
+        "No message content";
+    }
 
   const message = rawMessage.replace(/<[^>]*>/g, "").trim().substring(0, 1024);
   const conversationId = item?.id || "N/A";
