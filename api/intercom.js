@@ -11,7 +11,8 @@ module.exports = async function handler(req, res) {
 
   const isMessageEvent =
     eventType === "conversation.user.replied" ||
-    eventType === "conversation.user.created";
+    eventType === "conversation.user.created" ||
+    eventType === "conversation.admin.replied";
 
   if (!isMessageEvent) {
     console.log("Ignored event type:", eventType);
