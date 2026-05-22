@@ -56,7 +56,7 @@ module.exports = async function handler(req, res) {
         "No message content";
     }
 
-  const message = rawMessage.replace(/<[^>]*>/g, "").trim().substring(0, 1024);
+  const message = (rawMessage || "").replace(/<[^>]*>/g, "").trim().substring(0, 1024);
   const conversationId = item?.id || "N/A";
   const time = new Date().toISOString();
 
