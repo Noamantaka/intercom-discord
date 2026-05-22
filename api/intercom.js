@@ -41,6 +41,7 @@ module.exports = async function handler(req, res) {
   const time = new Date().toISOString();
 
   const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+  const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
 
   if (!DISCORD_WEBHOOK_URL) {
     return res.status(500).json({ error: "Webhook URL not configured" });
@@ -78,7 +79,20 @@ module.exports = async function handler(req, res) {
         continue;
       }
 
-      console.log("Discord thread created successfully");
+      const discordData = await discordRes.json();
+      const threadId = discordData?.channel_id;
+
+      console.log("Discord thread created:", threadId);
+
+      // احفظ الـ thread_id في Cloudflare KV
+      if (threadId && CLOUDFLARE_WORKER_URL) {
+        await fetch(`${CLOUDFLARE_WORKER_URL}/save-thread`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversationId, threadId }),
+        });
+      }
+
       return res.status(200).json({ success: true });
 
     } catch (err) {
