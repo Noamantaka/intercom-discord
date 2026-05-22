@@ -75,7 +75,9 @@ module.exports = async function handler(req, res) {
   }
 
   // بناء الـ content مع الصور
-  let content = `👤 **${name}** (${email})\n💬 ${message || "(no text)"}`;
+  let content = existingThreadId
+  ? `👤 **${name}** (${email})\n💬 ${message || "(no text)"}`
+  : `@everyone\n👤 **${name}** (${email})\n💬 ${message || "(no text)"}`;
 
   // أضف روابط الصور لو موجودة
   if (attachments && attachments.length > 0) {
