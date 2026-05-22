@@ -20,6 +20,7 @@ module.exports = async function handler(req, res) {
   }
 
   const name =
+    item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.author?.name ||
     item?.source?.author?.name ||
     item?.contacts?.data?.[0]?.name ||
     item?.author?.name ||
@@ -34,7 +35,10 @@ module.exports = async function handler(req, res) {
   let rawMessage;
   if (eventType === "conversation.user.created") {
     rawMessage = item?.source?.body || "No message content";
-  } else if (eventType === "conversation.user.replied") {
+  } else if (
+    eventType === "conversation.user.replied" ||
+    eventType === "conversation.admin.replied"
+  ) {
     rawMessage =
       item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
       item?.source?.body ||
@@ -55,7 +59,9 @@ module.exports = async function handler(req, res) {
   // جيب الـ thread_id لو موجود
   let existingThreadId = null;
   try {
-    const kvRes = await fetch(`${CLOUDFLARE_WORKER_URL}/get-thread?conversationId=${conversationId}`);
+    const kvRes = await fetch(
+      `${CLOUDFLARE_WORKER_URL}/get-thread?conversationId=${conversationId}`
+    );
     if (kvRes.ok) {
       const kvData = await kvRes.json();
       existingThreadId = kvData.threadId;
@@ -86,8 +92,13 @@ module.exports = async function handler(req, res) {
 
       if (!discordRes.ok) {
         const errText = await discordRes.text();
-        console.error(`Discord attempt ${attempt} failed:`, discordRes.status, errText);
-        if (attempt === 2) return res.status(500).json({ error: "Discord failed" });
+        console.error(
+          `Discord attempt ${attempt} failed:`,
+          discordRes.status,
+          errText
+        );
+        if (attempt === 2)
+          return res.status(500).json({ error: "Discord failed" });
         continue;
       }
 
@@ -104,10 +115,10 @@ module.exports = async function handler(req, res) {
       }
 
       return res.status(200).json({ success: true });
-
     } catch (err) {
       console.error(`Discord attempt ${attempt} error:`, err);
-      if (attempt === 2) return res.status(500).json({ error: "Discord failed" });
+      if (attempt === 2)
+        return res.status(500).json({ error: "Discord failed" });
     }
   }
 };
