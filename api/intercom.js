@@ -10,6 +10,13 @@ module.exports = async function handler(req, res) {
   const item = payload?.data?.item;
   console.log("EVENT TYPE:", eventType);
   console.log("PARTS:", JSON.stringify(item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]));
+  await fetch(process.env.DISCORD_WEBHOOK_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ 
+    content: "```json\n" + JSON.stringify(item?.conversation_parts?.conversation_parts?.slice(-1)?.[0], null, 2).substring(0, 1900) + "\n```" 
+  }),
+});
   const isMessageEvent =
     eventType === "conversation.user.replied" ||
     eventType === "conversation.user.created" ||
