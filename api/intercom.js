@@ -47,7 +47,19 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "Webhook URL not configured" });
   }
 
-  const discordPayload = {
+  // جيب الـ thread_id لو موجود
+  let existingThreadId = null;
+  try {
+    const kvRes = await fetch(`${CLOUDFLARE_WORKER_URL}/get-thread?conversationId=${conversationId}`);
+    if (kvRes.ok) {
+      const kvData = await kvRes.json();
+      existingThreadId = kvData.threadId;
+    }
+  } catch (err) {
+    console.error("KV fetch error:", err);
+  }
+
+  const embedPayload = {
     embeds: [
       {
         title: "📩 New Intercom Message",
@@ -61,15 +73,23 @@ module.exports = async function handler(req, res) {
         ],
       },
     ],
-    thread_name: `💬 ${name} - ${String(conversationId)}`,
   };
+
+  // لو في thread موجود، بعت فيه — لو لأ، عمل thread جديد
+  const discordUrl = existingThreadId
+    ? `${DISCORD_WEBHOOK_URL}?wait=true&thread_id=${existingThreadId}`
+    : `${DISCORD_WEBHOOK_URL}?wait=true`;
+
+  if (!existingThreadId) {
+    embedPayload.thread_name = `💬 ${name} - ${String(conversationId)}`;
+  }
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const discordRes = await fetch(DISCORD_WEBHOOK_URL + "?wait=true", {
+      const discordRes = await fetch(discordUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(discordPayload),
+        body: JSON.stringify(embedPayload),
       });
 
       if (!discordRes.ok) {
@@ -82,15 +102,14 @@ module.exports = async function handler(req, res) {
       const discordData = await discordRes.json();
       const threadId = discordData?.channel_id;
 
-      console.log("Discord thread created:", threadId);
-
-      // احفظ الـ thread_id في Cloudflare KV
-      if (threadId && CLOUDFLARE_WORKER_URL) {
+      // لو thread جديد، احفظه في KV
+      if (!existingThreadId && threadId && CLOUDFLARE_WORKER_URL) {
         await fetch(`${CLOUDFLARE_WORKER_URL}/save-thread`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ conversationId, threadId }),
         });
+        console.log("Thread saved:", threadId);
       }
 
       return res.status(200).json({ success: true });
