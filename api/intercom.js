@@ -4,19 +4,9 @@ module.exports = async function handler(req, res) {
   }
 
   const payload = req.body;
-  console.log("Intercom webhook received:", JSON.stringify(payload, null, 2));
-
   const eventType = payload?.topic;
   const item = payload?.data?.item;
-  console.log("EVENT TYPE:", eventType);
-  console.log("PARTS:", JSON.stringify(item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]));
-  await fetch(process.env.DISCORD_WEBHOOK_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ 
-    content: "```json\n" + JSON.stringify(item?.conversation_parts?.conversation_parts?.slice(-1)?.[0], null, 2).substring(0, 1900) + "\n```" 
-  }),
-});
+
   const isMessageEvent =
     eventType === "conversation.user.replied" ||
     eventType === "conversation.user.created" ||
@@ -41,24 +31,27 @@ module.exports = async function handler(req, res) {
     item?.author?.email ||
     "No Email";
 
-  let rawMessage;
-    if (eventType === "conversation.user.created") {
-    rawMessage = item?.source?.body || "No message content";
-    } else if (eventType === "conversation.admin.single.created") {
-    rawMessage = item?.source?.body || "No message content";
-    } else if (
+  // استخراج الرسالة والصور
+  let rawMessage = "";
+  let attachments = [];
+
+  if (eventType === "conversation.user.created") {
+    rawMessage = item?.source?.body || "";
+    attachments = item?.source?.attachments || [];
+  } else if (eventType === "conversation.admin.single.created") {
+    rawMessage = item?.source?.body || "";
+    attachments = item?.source?.attachments || [];
+  } else if (
     eventType === "conversation.user.replied" ||
     eventType === "conversation.admin.replied"
-    ) {
-    rawMessage =
-        item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
-        item?.source?.body ||
-        "No message content";
-    }
+  ) {
+    const lastPart = item?.conversation_parts?.conversation_parts?.slice(-1)?.[0];
+    rawMessage = lastPart?.body || item?.source?.body || "";
+    attachments = lastPart?.attachments || [];
+  }
 
   const message = (rawMessage || "").replace(/<[^>]*>/g, "").trim().substring(0, 1024);
   const conversationId = item?.id || "N/A";
-  const time = new Date().toISOString();
 
   const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
   const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
@@ -81,9 +74,21 @@ module.exports = async function handler(req, res) {
     console.error("KV fetch error:", err);
   }
 
-  const embedPayload = {
-    content: `👤 **${name}** (${email})\n💬 ${message}`,
-  };
+  // بناء الـ content مع الصور
+  let content = `👤 **${name}** (${email})\n💬 ${message || "(no text)"}`;
+
+  // أضف روابط الصور لو موجودة
+  if (attachments && attachments.length > 0) {
+    const imageUrls = attachments
+      .filter(a => a?.url)
+      .map(a => a.url)
+      .join("\n");
+    if (imageUrls) {
+      content += `\n📎 **Attachments:**\n${imageUrls}`;
+    }
+  }
+
+  const embedPayload = { content };
 
   const discordUrl = existingThreadId
     ? `${DISCORD_WEBHOOK_URL}?wait=true&thread_id=${existingThreadId}`
@@ -103,13 +108,8 @@ module.exports = async function handler(req, res) {
 
       if (!discordRes.ok) {
         const errText = await discordRes.text();
-        console.error(
-          `Discord attempt ${attempt} failed:`,
-          discordRes.status,
-          errText
-        );
-        if (attempt === 2)
-          return res.status(500).json({ error: "Discord failed" });
+        console.error(`Discord attempt ${attempt} failed:`, discordRes.status, errText);
+        if (attempt === 2) return res.status(500).json({ error: "Discord failed" });
         continue;
       }
 
@@ -128,8 +128,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true });
     } catch (err) {
       console.error(`Discord attempt ${attempt} error:`, err);
-      if (attempt === 2)
-        return res.status(500).json({ error: "Discord failed" });
+      if (attempt === 2) return res.status(500).json({ error: "Discord failed" });
     }
   }
 };
