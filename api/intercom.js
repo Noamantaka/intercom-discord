@@ -64,19 +64,7 @@ module.exports = async function handler(req, res) {
   }
 
   const embedPayload = {
-    embeds: [
-      {
-        title: "📩 New Intercom Message",
-        color: 5814783,
-        fields: [
-          { name: "👤 Name", value: name || "—", inline: true },
-          { name: "📧 Email", value: email || "—", inline: true },
-          { name: "💬 Message", value: message || "—", inline: false },
-          { name: "🧾 Conversation ID", value: String(conversationId), inline: true },
-          { name: "⏰ Time", value: time, inline: true },
-        ],
-      },
-    ],
+    content: `👤 **${name}** (${email})\n💬 ${message}`,
   };
 
   const discordUrl = existingThreadId
@@ -84,7 +72,7 @@ module.exports = async function handler(req, res) {
     : `${DISCORD_WEBHOOK_URL}?wait=true`;
 
   if (!existingThreadId) {
-    embedPayload.thread_name = `💬 ${name} - ${String(conversationId)}`;
+    embedPayload.thread_name = `${email} - ${String(conversationId)}`;
   }
 
   for (let attempt = 1; attempt <= 2; attempt++) {
