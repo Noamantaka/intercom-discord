@@ -9,6 +9,7 @@ module.exports = async function handler(req, res) {
   const eventType = payload?.topic;
   const item = payload?.data?.item;
   console.log("EVENT TYPE:", eventType);
+  console.log("PARTS:", JSON.stringify(item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]));
   const isMessageEvent =
     eventType === "conversation.user.replied" ||
     eventType === "conversation.user.created" ||
