@@ -30,11 +30,15 @@ module.exports = async function handler(req, res) {
     item?.author?.email ||
     "No Email";
 
-  const rawMessage =
-    item?.source?.body ||
-    item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
-    item?.body ||
-    "No message content";
+  let rawMessage;
+  if (eventType === "conversation.user.created") {
+    rawMessage = item?.source?.body || "No message content";
+  } else if (eventType === "conversation.user.replied") {
+    rawMessage =
+      item?.conversation_parts?.conversation_parts?.slice(-1)?.[0]?.body ||
+      item?.source?.body ||
+      "No message content";
+  }
 
   const message = rawMessage.replace(/<[^>]*>/g, "").trim().substring(0, 1024);
   const conversationId = item?.id || "N/A";
@@ -75,7 +79,6 @@ module.exports = async function handler(req, res) {
     ],
   };
 
-  // لو في thread موجود، بعت فيه — لو لأ، عمل thread جديد
   const discordUrl = existingThreadId
     ? `${DISCORD_WEBHOOK_URL}?wait=true&thread_id=${existingThreadId}`
     : `${DISCORD_WEBHOOK_URL}?wait=true`;
@@ -102,7 +105,6 @@ module.exports = async function handler(req, res) {
       const discordData = await discordRes.json();
       const threadId = discordData?.channel_id;
 
-      // لو thread جديد، احفظه في KV
       if (!existingThreadId && threadId && CLOUDFLARE_WORKER_URL) {
         await fetch(`${CLOUDFLARE_WORKER_URL}/save-thread`, {
           method: "POST",
