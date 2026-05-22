@@ -4,17 +4,11 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const commands = [
   {
     name: "reply",
-    description: "Reply to an Intercom conversation",
+    description: "Reply to the current Intercom conversation",
     options: [
       {
-        name: "conversation_id",
-        description: "الـ Conversation ID",
-        type: 3,
-        required: true,
-      },
-      {
         name: "message",
-        description: "الرسالة",
+        description: "Your message",
         type: 3,
         required: true,
       },
