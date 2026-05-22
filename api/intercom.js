@@ -14,13 +14,8 @@ module.exports = async function handler(req, res) {
     eventType === "conversation.user.created" ||
     eventType === "conversation.admin.replied";
 
-    if (!isMessageEvent) {
-    // بعت الـ event type لـ Discord عشان نشوفه
-    await fetch(process.env.DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: `🔍 Ignored event: **${eventType}**` }),
-    });
+  if (!isMessageEvent) {
+    console.log("Ignored event type:", eventType);
     return res.status(200).json({ ignored: true });
   }
 
